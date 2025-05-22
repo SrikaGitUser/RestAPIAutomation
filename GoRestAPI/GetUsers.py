@@ -16,4 +16,23 @@ def get_request():
     json_data = json.dumps(response.json(), indent=4)
     print("Response Body :", json_data)
 
+#POST Request
+def post_request():
+    url = base_url + "/public/v2/users"
+    print("post url: " + url)
+    headers = {"Authorization": auth_token}
+    data = {"name": "Purushottam2 Reddy2",
+            "email": "reddy2_purushottam2@braun.test",
+            "gender": "male",
+            "status": "active"}
+    response = requests.post(url, json=data, headers=headers)
+    assert response.status_code == 201
+    json_data = response.json()
+    json_str = json.dumps(json_data, indent=4)
+    print("json response body: ", json_str)
+    user_id = json_data["id"]
+    assert "name" in json_data
+    assert json_data["name"]=="Purushottam2 Reddy2"
+    return user_id
+
 get_request()
