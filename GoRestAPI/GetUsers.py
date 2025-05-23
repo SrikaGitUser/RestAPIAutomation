@@ -17,22 +17,38 @@ def get_request():
     print("Response Body :", json_data)
 
 #POST Request
-def post_request():
-    url = base_url + "/public/v2/users"
-    print("post url: " + url)
-    headers = {"Authorization": auth_token}
-    data = {"name": "Purushottam2 Reddy2",
-            "email": "reddy2_purushottam2@braun.test",
-            "gender": "male",
-            "status": "active"}
-    response = requests.post(url, json=data, headers=headers)
-    assert response.status_code == 201
-    json_data = response.json()
-    json_str = json.dumps(json_data, indent=4)
-    print("json response body: ", json_str)
-    user_id = json_data["id"]
-    assert "name" in json_data
-    assert json_data["name"]=="Purushottam2 Reddy2"
-    return user_id
+def post_request(url, filepath, headers, content_type='json'):
+    try:
+        with open(filepath, 'r') as file:
+            if content_type.lower() == 'json':
+                payload = json.load(file)
+            else:
+                payload = file.read()
+        print(payload)
 
-get_request()
+        if content_type.lower() == 'json':
+             response = requests.post(url, json=payload, headers=headers)
+        else:
+            response = requests.post(url, data=payload, headers=headers)
+        print(response)
+        assert response.status_code == 201
+        json_data = response.json()
+        json_str = json.dumps(json_data, indent=4)
+        print("json response body: ", json_str)
+        user_id = json_data["id"]
+        print("User id; ", user_id)
+
+        response.raise_for_status()
+        return response.text
+
+    except FileNotFoundError:
+        return "Error: Payload file not found."
+    except json.JSONDecodeError:
+        return "Error: Invalid JSON format in the payload file."
+    except requests.exceptions.RequestException as e:
+       return f"Request error: {e}"
+
+url = base_url + "/public/v2/users"
+file_path = 'C:/Users/srika/PycharmProjects/RestAPIAutomation/GoRestAPI/Payload.json'
+headers = {"Authorization": auth_token}
+post_request(url, file_path, headers, content_type='json')
